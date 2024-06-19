@@ -13,7 +13,7 @@ Create, Configure, Manage Environments, and Publish your project with ease.
 1. Give your step a name
 2. Set the action uses field. 
   - [uses](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions) parameter
-    - `actions/AWS Amplify CLI Action@VERSION_HERE`
+    - `SharpNub/amplify-cli-action@VERSION_HERE`
 3. Implement a CLI command (examples below)
   - [with](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepswith) parameters
     - [required] `amplify_command`
@@ -36,7 +36,7 @@ run: |
   # also remove -_ from branch name and limit length to 10 for amplify env restriction
   echo "##[set-output name=amplifyenvname;]$(echo ${GITHUB_HEAD_REF//[-_]/} | cut -c-10)"
 name: deploy test environment
-uses: SharpNub/amplify-cli-action@0.4.5
+uses: SharpNub/amplify-cli-action@1.0.0
 with:
   amplify_command: add_env
   amplify_env: ${{ steps.setenvname.outputs.amplifyenvname }}
@@ -49,7 +49,7 @@ env:
 **Configure**
 ```
 name: Configure Amplify
-uses: actions/AWS Amplify CLI Action@1.0.0
+uses: SharpNub/amplify-cli-action@1.0.0
 with:
   amplify_command: configure
   amplify_env: develop
@@ -62,7 +62,7 @@ env:
 **Publish**
 ```
 name: Publish Amplify
-uses: actions/AWS Amplify CLI Action@1.0.0
+uses: SharpNub/amplify-cli-action@1.0.0
 with:
   amplify_command: publish
   amplify_env: develop
@@ -75,7 +75,7 @@ env:
 **Unpublish**
 ```
 name: undeploy test environment
-uses: SharpNub/amplify-cli-action@0.4.5
+uses: SharpNub/amplify-cli-action@1.0.0
 # run even if previous step fails
 if: failure() || success()
 with:
@@ -117,7 +117,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: configure amplify
-      uses: SharpNub/amplify-cli-action@0.4.5
+      uses: SharpNub/amplify-cli-action@1.0.0
       with:
         amplify_command: configure
         amplify_env: prod
@@ -134,7 +134,7 @@ jobs:
         # npm run test
     
     - name: deploy
-      uses: SharpNub/amplify-cli-action@0.4.5
+      uses: SharpNub/amplify-cli-action@1.0.0
       with:
         amplify_command: publish
         amplify_env: prod
@@ -350,7 +350,7 @@ jobs:
         # also remove -_ from branch name and limit length to 10 for amplify env restriction
         echo "##[set-output name=amplifyenvname;]$(echo ${GITHUB_HEAD_REF//[-_]/} | cut -c-10)"
     - name: deploy test environment
-      uses: SharpNub/amplify-cli-action@0.4.5
+      uses: SharpNub/amplify-cli-action@1.0.0
       with:
         amplify_command: add_env
         amplify_env: ${{ steps.setenvname.outputs.amplifyenvname }}
@@ -368,7 +368,7 @@ jobs:
         # npm run test
     
     - name: undeploy test environment
-      uses: SharpNub/amplify-cli-action@0.4.5
+      uses: SharpNub/amplify-cli-action@1.0.0
       # run even if previous step fails
       if: failure() || success()
       with:
