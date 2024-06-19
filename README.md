@@ -1,17 +1,102 @@
-# amplify-cli-action
+# AWS Amplify CLI Action
 
-[![RELEASE](https://img.shields.io/github/v/release/AresFitness/amplify-cli-action?include_prereleases)](https://github.com/AresFitness/amplify-cli-action/releases)
+[![RELEASE](https://img.shields.io/github/v/release/SharpNub/amplify-cli-action?include_prereleases)](https://github.com/SharpNub/amplify-cli-action/releases)
 [![View Action](https://img.shields.io/badge/view-action-blue.svg?logo=github&color=orange)](https://github.com/marketplace/actions/amplify-cli-action-sh)
-[![LICENSE](https://img.shields.io/github/license/AresFitness/amplify-cli-action)](https://github.com/AresFitness/amplify-cli-action/blob/master/LICENSE)
-[![ISSUES](https://img.shields.io/github/issues/AresFitness/amplify-cli-action)](https://github.com/AresFitness/amplify-cli-action/issues)
+[![LICENSE](https://img.shields.io/github/license/SharpNub/amplify-cli-action)](https://github.com/SharpNub/amplify-cli-action/blob/master/LICENSE)
+[![ISSUES](https://img.shields.io/github/issues/SharpNub/amplify-cli-action)](https://github.com/SharpNub/amplify-cli-action/issues)
   
-🚀 :octocat: AWS Amplify CLI support for github actions. This action supports configuring and deploying your project to AWS as well as creating and undeploying amplify environments.
+AWS Amplify CLI support for Github Actions.
+
+Create, Configure, Manage Environments, and Publish your project with ease.
 
 ## Getting Started
-You can include the action in your workflow as `actions/amplify-cli-action@0.4.5`. Example (configuring amplify, building and deploying):
+1. Give your step a name
+2. Set the action uses field. 
+  - [uses](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions) parameter
+    - `actions/AWS Amplify CLI Action@VERSION_HERE`
+3. Implement a CLI command (examples below)
+  - [with](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepswith) parameters
+    - [required] `amplify_command`
+    - [required] `amplify_env`
+  - [env](https://docs.github.com/en/actions/learn-github-actions/variables) parameters. It is recommended to use [Github Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
+    - [required] `AWS_ACCESS_KEY_ID`
+    - [required] `AWS_SECRET_ACCESS_KEY`
+    - [required] `AWS_REGION`
+4. Add your Github Secrets to your project
+5. Run your Github Action, Enjoy!
+
+## Use Cases
+
+**Create**
+```
+name: set amplify env name
+id: setenvname
+run: |
+  # use GITHUB_HEAD_REF that is set to PR source branch
+  # also remove -_ from branch name and limit length to 10 for amplify env restriction
+  echo "##[set-output name=amplifyenvname;]$(echo ${GITHUB_HEAD_REF//[-_]/} | cut -c-10)"
+name: deploy test environment
+uses: SharpNub/amplify-cli-action@0.4.5
+with:
+  amplify_command: add_env
+  amplify_env: ${{ steps.setenvname.outputs.amplifyenvname }}
+  amplify_cli_version: '9.2.1'
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: us-east-1
+```
+**Configure**
+```
+name: Configure Amplify
+uses: actions/AWS Amplify CLI Action@1.0.0
+with:
+  amplify_command: configure
+  amplify_env: develop
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: us-east-1
+```
+
+**Publish**
+```
+name: Publish Amplify
+uses: actions/AWS Amplify CLI Action@1.0.0
+with:
+  amplify_command: publish
+  amplify_env: develop
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: us-east-1
+```
+
+**Unpublish**
+```
+name: undeploy test environment
+uses: SharpNub/amplify-cli-action@0.4.5
+# run even if previous step fails
+if: failure() || success()
+with:
+  amplify_command: delete_env
+  amplify_env: ${{ steps.setenvname.outputs.amplifyenvname }}
+  amplify_cli_version: '9.2.1'
+  delete_lock: false
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: us-east-1
+```
+
+---
+
+## Full Example
+
+Example (configuring amplify, building and deploying):
 
 ```yaml
-name: 'Amplify Deploy'
+name: 'Amplify Deploy Example'
 on: [push]
 
 jobs:
@@ -32,7 +117,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: configure amplify
-      uses: AresFitness/amplify-cli-action@0.4.5
+      uses: SharpNub/amplify-cli-action@0.4.5
       with:
         amplify_command: configure
         amplify_env: prod
@@ -49,7 +134,7 @@ jobs:
         # npm run test
     
     - name: deploy
-      uses: AresFitness/amplify-cli-action@0.4.5
+      uses: SharpNub/amplify-cli-action@0.4.5
       with:
         amplify_command: publish
         amplify_env: prod
@@ -60,11 +145,18 @@ jobs:
     
 ```
 
-## Configuration
-You are required to provide `amplify_command` and `amplify_env` input parameters ([with](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepswith) section of your workflow) as well as AWS credentials and aws region: **AWS_ACCESS_KEY_ID**,  **AWS_SECRET_ACCESS_KEY**, **AWS_REGION** environment variables that should be stored as repo secrets. You can learn more about setting environment variables with Github action [here](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions#jobsjob_idstepsenv).
+---
 
 ## AWS Credentials: Controlling Access with IAM
-I would personally discourage using `AdministratorAccess` IAM policy or root account credentials for **AWS_ACCESS_KEY_ID**,  **AWS_SECRET_ACCESS_KEY** here. Instead, consider creating a designated AWS IAM user for this step with permissions restricted to AWS resources associated with amplify category resources used. This can get tricky since in addition to AWS CloudFormation permissions, IAM user who creates or delete stacks require additional permissions that depends on the stack templates. For example, if you have a template that describes an Amazon DynamoDB Table (in amplify storage category), IAM user must have the corresponding permissions for Amazon DynamoDB actions to successfully create the stack. Nonetheless, next steps guide you through creation of IAM user for this step.
+It is BAD PRACTICE to use `AdministratorAccess` IAM policy or root account credentials for **AWS_ACCESS_KEY_ID**,  **AWS_SECRET_ACCESS_KEY** here. 
+
+Instead, consider creating a designated AWS IAM user for this step with permissions restricted to AWS resources associated with amplify category resources used. 
+
+This will likely require trial and error since in addition to AWS CloudFormation permissions, the IAM user who creates or delete stacks requires permissions for anything being created in the stack templates. 
+
+For example, if you have a template that describes an Amazon DynamoDB Table (in amplify storage category), IAM user must have the corresponding permissions for Amazon DynamoDB actions to successfully create the stack. 
+
+Nonetheless, next steps will guide you through creation of IAM user for this step.
 
 1. Navigate to [AWS Identity and Access Management console](https://console.aws.amazon.com/iam/home)
 2. Under Users -> `Add New User`. Fill in the user name(`GithubCI`) and set `Programmatic Access` for **Access type**.
@@ -133,7 +225,13 @@ I would personally discourage using `AdministratorAccess` IAM policy or root acc
   }
   ```
 
-  The first 3 policy statement blocks contain neccessary IAM permissions for Amplify CloudFormation deployments to work, while the last one contains permissions corresponding to AWS resources that are commonly used in Amplify (as an example): `auth`, `api`, `hosting`, `storage`, `function`. You will most likely **NEED TO ADD** more permissions corresponding to other resources used in your project. You may further constraint it down to specific service actions, but this can be a bit annoying as it is not clear and obvious what permissions(wasn't able to find cloudformation docs that list permissions needed to create/update/remove resources for given service) you will need for a given amplify category resource, most likely you will find yourself iteratively deploying while tweaking IAM permissions until deployment succeeds.
+  The first 3 policy statement blocks contain neccessary IAM permissions for Amplify CloudFormation deployments to work. 
+
+  The last policy statement contains permissions corresponding to AWS resources that are commonly used in Amplify (as an example): `auth`, `api`, `hosting`, `storage`, `function`. 
+  
+  You will **NEED TO ADD** more permissions corresponding to the resources your amplify application uses. 
+  
+  You may further constraint it down to specific service actions. You will find this will require you to iteratively deploy while tweaking IAM permissions until deployment succeeds. This is normal - if it was easy, your IAM policy is probably not very secure.
 
 5. In the previous page group creation dropdown, find a newly created policy in the list, add a name (`AmplifyDeploy`) and click on Create Group.
 6. Select a newly created group for this new user, click through the other steps and finish creating a new user.
@@ -252,7 +350,7 @@ jobs:
         # also remove -_ from branch name and limit length to 10 for amplify env restriction
         echo "##[set-output name=amplifyenvname;]$(echo ${GITHUB_HEAD_REF//[-_]/} | cut -c-10)"
     - name: deploy test environment
-      uses: AresFitness/amplify-cli-action@0.4.5
+      uses: SharpNub/amplify-cli-action@0.4.5
       with:
         amplify_command: add_env
         amplify_env: ${{ steps.setenvname.outputs.amplifyenvname }}
@@ -270,7 +368,7 @@ jobs:
         # npm run test
     
     - name: undeploy test environment
-      uses: AresFitness/amplify-cli-action@0.4.5
+      uses: SharpNub/amplify-cli-action@0.4.5
       # run even if previous step fails
       if: failure() || success()
       with:

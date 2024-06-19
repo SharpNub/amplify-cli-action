@@ -1,4 +1,4 @@
-name: 'amplify-cli-action-sh'
+name: 'AWS Amplify CLI Action'
 description: 'This action builds and deploys your AWS Amplify project using an SH script'
 inputs:
   project_dir: 
