@@ -1,4 +1,4 @@
-name: 'AWS Amplify CLI Action'
+name: 'AWS AMPLIFY CLI ACTION'
 description: 'This action builds and deploys your AWS Amplify project using an SH script'
 inputs:
   project_dir: 
@@ -41,5 +41,5 @@ runs:
          $GITHUB_ACTION_PATH/entrypoint.sh "${{ inputs.project_dir }}" "${{ inputs.source_dir }}" "${{ inputs.distribution_dir }}" "${{ inputs.build_command }}" "${{ inputs.amplify_command }}" "${{ inputs.amplify_env }}" "${{ inputs.delete_lock }}" "${{ inputs.amplify_cli_version }}" "${{ inputs.amplify_arguments }}"
       shell: bash
 branding:
-  icon: 'git-commit'
-  color: 'orange'
+  icon: 'cloud-lightning'
+  color: 'yellow'
